@@ -1,0 +1,92 @@
+# Proxmox Full-Clone
+# Create a full ha set on proxmox
+
+variable "full-clone" {
+  description = "vm variables in a dictionary "
+  type        = map(any)
+    default = {
+      {% set ns = namespace(count=0) %}
+      {% for node in config.proxmox_nodes %}
+        {% for vm in node.vm_clone_infos %}
+          m{{ ns.count }} = {
+            target_node = "{{ node.target_node }}",
+            vcpu = "{{ vm.vcpu }}",
+            memory = "{{ vm.memory }}",
+            disk_size = "{{ vm.disk_size }}",
+            storage_pool = "{{ vm.storage_pool }}",
+            name = "{{ vm.vm_name }}",
+            ip = "{{ vm.ip }}/24",
+            gw = "{{ node.gw }}",
+            vmid = "{{ vm.vm_id }}",
+            network_bridge = "{{ node.network_bridge }}",
+            interface = "{{ node.interface }}{{ ns.count }}"
+            tags = "{{ vm.tags }}"
+          }
+        {% set ns.count = ns.count + 1 %}
+        {% endfor %}
+      {% endfor %}
+    }
+}
+
+resource "proxmox_virtual_environment_vm" "full-clone" {
+
+  # VM General Settings
+  for_each = var.full-clone
+  node_name = each.value.target_node
+  vm_id = each.value.vmid
+  name = each.value.name
+  tags = [each.value.tags]
+
+  # VM OS Settings
+  clone {
+    vm_id = {{ config.proxmox_clone_template_id }}
+    full = true
+  }
+
+  # VM System Settings
+  agent {
+    enabled = true
+  }
+
+  # VM CPU Settings
+  cpu {
+    cores = each.value.vcpu
+    sockets = 1
+  }
+
+  # VM Memory Settings
+  memory {
+    dedicated = each.value.memory
+  }
+
+  # disk settings
+  disk {
+    size = each.value.disk_size
+    ssd = true
+    datastore_id = each.value.storage_pool
+    interface = each.value.interface
+  }
+
+  # VM Network Settings
+  network_device {
+      bridge = each.value.network_bridge
+  }
+
+  initialization {
+    ip_config {
+      ipv4 {
+        address = each.value.ip
+        gateway = each.value.gw
+      }
+    }
+    user_account {
+      {% if config.sshkeys %}
+        keys = ["{{ config.sshkeys }}"]
+      {% endif %}
+      {% if config.ciuser %}
+        password = "{{ config.cipassword }}"
+        username = "{{ config.ciuser }}"
+      {% endif %}
+    }
+  }
+}

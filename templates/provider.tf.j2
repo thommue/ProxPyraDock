@@ -1,0 +1,23 @@
+# Proxmox Provider
+# Initial Provider Configuration for Proxmox
+
+terraform {
+
+    required_version = ">= 0.13.0"
+
+    required_providers {
+        proxmox = {
+            source = "{{ config.terraform_provider }}"
+            version = "{{ config.proxmox_provider_plugin_version }}"
+        }
+    }
+}
+
+provider "proxmox" {
+
+    endpoint = "{{ config.proxmox_api_url }}"
+    username = "{{ config.proxmox_username }}"
+    password = "{{ config.proxmox_password }}"
+    insecure = true
+
+}
