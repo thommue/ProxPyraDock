@@ -1,6 +1,6 @@
 import os
 from jinja2 import Environment, FileSystemLoader
-from utils.create_obj import ConfigObj, ProxmoxNode
+from utils.create_obj import ConfigObj
 
 
 def render_provider_file(template_path: str, tmp_path: str, config_obj: ConfigObj) -> None:

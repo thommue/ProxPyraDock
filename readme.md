@@ -128,3 +128,6 @@ The configs allow multiple vm infos and / or multiple nodes like:
 
 So just greate the ``config.json`` in the root folder and you are good to go. Have fun, and if there are any issues, 
 please reach out.
+
+### Hint
+- for **mac** please remove in the ``deployment.py`` the ``Shell=True`` property, then the code works just fine for you.
