@@ -34,28 +34,29 @@ for node in config.proxmox_nodes:
 
     # terraform commands
     command = ["terraform", "init", "-upgrade"]
-    process = subprocess.Popen(command, shell=True)
+    process = subprocess.Popen(command)
     process.wait()
     print(process)
 
     command = ["terraform", "apply", "-auto-approve"]
-    process = subprocess.Popen(command, shell=True)
+    process = subprocess.Popen(command)
     process.wait()
     print(process)
 
-    # letting time for the init-config to process in the new cloned vm
-    total_wait_time = 120
-    while total_wait_time > 0:
-        print(f"VM Init set uptime left: {total_wait_time} seconds")
-        time.sleep(10)
-        total_wait_time -= 10
+    if config.compose_folder:
+        # letting time for the init-config to process in the new cloned vm
+        total_wait_time = 120
+        while total_wait_time > 0:
+            print(f"VM Init set uptime left: {total_wait_time} seconds")
+            time.sleep(10)
+            total_wait_time -= 10
 
-    # docker-compose commands
-    print("Docker Compose Setup Started")
-    for vm in node.vm_clone_infos:
-        docker_compose_commands(
-            root_path=root_folder, compose_folder=config.compose_folder, config=config, hostname=vm.ip
-        )
+        # docker-compose commands
+        print("Docker Compose Setup Started")
+        for vm in node.vm_clone_infos:
+            docker_compose_commands(
+                root_path=root_folder, compose_folder=config.compose_folder, config=config, hostname=vm.ip
+            )
 
     # change back to root
     os.chdir(root_folder)

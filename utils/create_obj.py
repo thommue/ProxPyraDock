@@ -20,11 +20,12 @@ class ProxmoxNode(BaseModel):
     gw: str
     network_bridge: str
     interface: str
+    proxmox_clone_template_id: int
 
 
 class ConfigObj(BaseModel):
     template_folder: str
-    compose_folder: str
+    compose_folder: Optional[str]
     proxmox_api_url: str
     proxmox_username: str
     proxmox_password: str
@@ -36,7 +37,6 @@ class ConfigObj(BaseModel):
     cipassword: Optional[str]
     sshkeys: Optional[str]
     ssh_privat_path: Optional[str]
-    proxmox_clone_template_id: int
 
 
 class Config:
@@ -67,19 +67,19 @@ class Config:
                     vm_clone_infos=vm_clones,
                     gw=node["gw"],
                     network_bridge=node["network_bridge"],
-                    interface=node["interface"]
+                    interface=node["interface"],
+                    proxmox_clone_template_id=node["proxmox_clone_template_id"]
                 )
             )
         return ConfigObj(
             template_folder=self.config["template_folder"],
-            compose_folder=self.config["compose_folder"],
+            compose_folder=self.config.get('compose_folder', None),
             proxmox_api_url=self.config["proxmox_api_url"],
             proxmox_username=self.config["proxmox_username"],
             proxmox_password=self.config["proxmox_password"],
             terraform_provider=self.config["terraform_provider"],
             proxmox_provider_plugin_version=self.config["proxmox_provider_plugin_version"],
             tls_skip=self.config["tls_skip"],
-            proxmox_clone_template_id=self.config["proxmox_clone_template_id"],
             proxmox_nodes=proxmox_nodes,
             ciuser=self.config.get('ciuser', None),
             cipassword=self.config.get('cipassword', None),

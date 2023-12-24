@@ -21,6 +21,7 @@ variable "full-clone" {
             network_bridge = "{{ node.network_bridge }}",
             interface = "{{ node.interface }}{{ ns.count }}"
             tags = "{{ vm.tags }}"
+            proxmox_clone_template_id = {{ node.proxmox_clone_template_id }}
           }
         {% set ns.count = ns.count + 1 %}
         {% endfor %}
@@ -39,7 +40,7 @@ resource "proxmox_virtual_environment_vm" "full-clone" {
 
   # VM OS Settings
   clone {
-    vm_id = {{ config.proxmox_clone_template_id }}
+    vm_id = each.value.proxmox_clone_template_id
     full = true
   }
 
